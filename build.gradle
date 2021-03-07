@@ -1,0 +1,53 @@
+apply plugin: "kotlin"
+
+version '1.0'
+
+
+sourceSets.main.kotlin.srcDirs = ["src"]
+
+buildscript{
+    repositories{
+        maven{url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+
+    }
+    
+    ext{
+        kotlinVersion = "1.4.21"
+        //the build number that this mod is made for
+        mindustryVersion = 'v126.1'
+        //version of SDK you will be using
+
+        doExec = { cmd ->
+            def proc = cmd.execute(null, new File("$buildDir/libs"))
+            proc.waitForProcessOutput(System.out, System.err)
+        }
+    }
+
+    dependencies{
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    }
+}
+
+repositories{
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+}
+
+
+dependencies{
+    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation "org.jetbrains.kotlin:kotlin-script-runtime:1.4.21"
+}
+
+jar{
+    archiveFileName = "${project.archivesBaseName}.jar"
+    from{
+        configurations.runtimeClasspath.collect{it.isDirectory() ? it : zipTree(it)}
+    }
+
+    from(rootDir){
+        include "plugin.json"
+    }
+}

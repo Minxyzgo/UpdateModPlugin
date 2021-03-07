@@ -1,0 +1,9 @@
+{
+  "name": "UpdateModPlugin",
+  "author": "Minxyzgo",
+  "main": "minxyzgo.plugin.auto",
+  "description": "一个插件用于更新模组与其他插件 (使用git api)",
+  "apiHttp": "https://api.github.com/repos/Minxyzgo/UpdateModPlugin",
+  "apiAsset": "UpdateModPlugin",
+  "version": 1.0
+}
