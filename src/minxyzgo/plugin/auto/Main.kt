@@ -2,6 +2,7 @@ package minxyzgo.plugin.auto
 
 import arc.*
 import arc.files.*
+import arc.struct.*
 import arc.util.*
 import arc.util.io.*
 import arc.util.serialization.*
@@ -34,7 +35,7 @@ class Main : Plugin() {
     }
     
     private fun update() {
-        for(mod : Vars.mods.list()) {
+        for(mod in Vars.mods.list()) {
             val zip = mod.file
             var metaf: Fi? = null
             listOf("mod.json", "mod.hjson", "plugin.json", "plugin.hjson").forEach {
@@ -42,7 +43,7 @@ class Main : Plugin() {
             }
             
             val json = Jval.read(metaf!!.readString())
-            val version = "v"
+            var version = "v"
             version += Regex("""\d+(.\d+)*""").find(mod.meta.version)?.value ?: "0"
             val api: String? = json.getString("apiHttp", null)
             val apiAsset: String? = json.getString("apiAsset", null)
@@ -76,19 +77,19 @@ class Main : Plugin() {
         }
         
         Log.info("发现以下mod | plugin有新版本: ")
-        var allSize: Long = 0l
+        var allSize: Long = 0L
         metas.forEach {
             Log.info("mod | plugin: @, 新版本: @", it.name, it.newBuild)
             allSize += it.size
         }
         
         var base: String? = null
-        if(allSize < 1024l) {
+        if(allSize < 1024L) {
             base = "$allSize bt"
-        } else if(allSize < 1048576l) {
-            base = "${Math.round(allSize.toDouble() / 1024d)} kb"
+        } else if(allSize < 1048576L) {
+            base = "${Math.round(allSize.toDouble() / 1024)} kb"
         } else {
-            base = "${Math.round(allSize.toDouble() / 1048576d)} mb"
+            base = "${Math.round(allSize.toDouble() / 1048576)} mb"
         }
         
         Log.info("预计更新大小: @", base!!)
@@ -107,7 +108,7 @@ class Main : Plugin() {
             }catch (e : Exception){
                 e.printStackTrace()
                 Log.info("更新失败，终止更新")
-                return
+                return@update
             }finally {
                 conn?.disconnect()
             }
@@ -138,22 +139,22 @@ class Main : Plugin() {
         val version1Array = v1.split("[._]")
         val version2Array = v2.split("[._]")
         var index = 0
-        var minLen = Math.min(version1Array.length, version2Array.length)
-        var diff = 0l
+        var minLen = Math.min(version1Array.count(), version2Array.count())
+        var diff = 0L
         
         while (index < minLen
-                && Strings.parseLong(version1Array[index].apply { diff = this }
-                - Strings.parseLong(version2Array[index])) == 0) {
+                && (Strings.parseLong(version1Array[index].apply { diff = this })
+                - Strings.parseLong(version2Array[index]) == 0L)) {
             index++
         }
-        if (diff == 0) {
-            for (i in index..version1Array.length) {
+        if (diff == 0L) {
+            for (i in index..version1Array.count()) {
                 if (Strings.parseLong(version1Array[i]) > 0) {
                     return 1
                 }
             }
             
-            for (i in index..version2Array.length) {
+            for (i in index..version2Array.count()) {
                 if (Strings.parseLong(version2Array[i]) > 0) {
                     return -1
                 }
