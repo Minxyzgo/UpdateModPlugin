@@ -126,7 +126,7 @@ class Main : Plugin() {
         v1: String, 
         v2: String
     ): String {
-        if (v1 == null || v1.length < 1 || v2 == null || v2.length < 1) return null
+        if (v1 == null || v1.length < 1 || v2 == null || v2.length < 1) return "*"
         val regEx = "[^0-9]"
         val p = Pattern.compile(regEx)
         var s1: String = p.matcher(v1).replaceAll("").trim()
