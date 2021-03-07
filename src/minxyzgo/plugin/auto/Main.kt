@@ -54,20 +54,20 @@ class Main : Plugin() {
                 if (res.status == Net.HttpStatus.OK) {
                     val json = Jval.read(res.resultAsString).asArray().first()
                     var newBuild = json.getString("tag_name", "")
-                    if (compareVersion(newBuild, version) == 1) {
+                    if (compareVersion(newBuild, version) == newBuild) {
                         val asset = json.get("assets").asArray().find {
-                            it.getString("name", "").startsWith(apiAsset)
+                            it.getString("name", "").startsWith(apiAsset!!)
                         }
                         val url = asset.getString("browser_download_url", "")
                         val cUrl = URL("https://gh.api.99988866.xyz/$url")
                         val conn = cUrl.openConnection()
                         val size = conn.getContentLength()
                         conn.getInputStream().close()
-                        metas.add(FileMeta(mod.meta.name, newBuild, zip.getPath(), cUrl, size))
+                        metas.add(FileMeta(mod.meta.name, newBuild, zip.path(), cUrl, size))
                     }
                 }
             }, {
-                Log.info("[red]")
+                Log.info("更新失败")
             })
         }
         
@@ -121,49 +121,40 @@ class Main : Plugin() {
         }
     }
     
-     /**
-     * 版本号比较
-     *
-     * @param v1
-     * @param v2
-     * @return 0代表相等，1代表左边大，-1代表右边大
-     * compareVersion("1.0.358_20180820090554","1.0.358_20180820090553")=1
-     */
-    private fun compareVersion(
+    
+    fun compareVersion(
         v1: String, 
         v2: String
-    ): Int {
-        if (v1.equals(v2)) {
-            return 0
+    ): String {
+        if (v1 == null || v1.length < 1 || v2 == null || v2.length < 1) return null
+        val regEx = "[^0-9]"
+        val p = Pattern.compile(regEx)
+        var s1: String = p.matcher(v1).replaceAll("").trim()
+        var s2: String = p.matcher(v2).replaceAll("").trim()
+ 
+        val cha: Int = s1.length - s2.length
+        var buffer = StringBuffer()
+        var i = 0
+        while (i < Math.abs(cha)) {
+            buffer.append("0")
+            ++i
         }
-        val version1Array = v1.split("[._]")
-        val version2Array = v2.split("[._]")
-        var index = 0
-        var minLen = Math.min(version1Array.count(), version2Array.count())
-        var diff = 0L
-        
-        while (index < minLen
-                && (Strings.parseLong(version1Array[index].apply { diff = this })
-                - Strings.parseLong(version2Array[index]) == 0L)) {
-            index++
+ 
+        if (cha > 0) {
+            buffer.insert(0, s2)
+            s2 = buffer.toString()
+        } else if (cha < 0) {
+            buffer.insert(0, s1)
+            s1 = buffer.toString()
         }
-        if (diff == 0L) {
-            for (i in index..version1Array.count()) {
-                if (Strings.parseLong(version1Array[i]) > 0) {
-                    return 1
-                }
-            }
-            
-            for (i in index..version2Array.count()) {
-                if (Strings.parseLong(version2Array[i]) > 0) {
-                    return -1
-                }
-            }
-            return 0
-        } else {
-            return if(diff > 0) 1 else -1
-        }
+ 
+        val s1Int = s1.toInt()
+        val s2Int = s2.toInt()
+ 
+        if (s1Int > s2Int) return v1
+        else return v2
     }
+
     
     data class FileMeta(
         val name: String,
